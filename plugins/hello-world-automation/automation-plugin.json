@@ -9,7 +9,12 @@
   "runtime": {
     "agent_profile": {
       "required": true,
-      "default_name": "hello-world-agent"
+      "default_name": "hello-world-agent",
+      "allowed_tools": [
+        "terminal",
+        "file_editor",
+        "task_tracker"
+      ]
     },
     "llm_profile": {
       "required": true,

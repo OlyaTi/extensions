@@ -9,3 +9,5 @@ metadata exposed through environment variables and config files.
 The script is intentionally deterministic and does not start an agent
 conversation. It prints the configured message, plus the agent and LLM profile
 names when the runtime provides them.
+
+The manifest also demonstrates `runtime.agent_profile.allowed_tools`: the automation service should reject an agent profile that enables any explicit tool outside this allowlist during validation.
