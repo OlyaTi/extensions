@@ -11,9 +11,7 @@
       "required": true,
       "default_name": "hello-world-agent",
       "allowed_tools": [
-        "terminal",
-        "file_editor",
-        "task_tracker"
+        "terminal"
       ]
     },
     "llm_profile": {
