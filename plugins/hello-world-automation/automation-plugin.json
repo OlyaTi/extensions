@@ -14,7 +14,6 @@
         "terminal"
       ]
     },
-    "required_secrets": [],
     "plugins": []
   },
   "config_schema": {
