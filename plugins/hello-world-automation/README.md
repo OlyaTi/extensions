@@ -8,7 +8,8 @@ with runtime metadata exposed through environment variables and config files.
 
 The script is intentionally deterministic and does not start an agent
 conversation. It prints the plugin-owned message and the agent profile name when
-the runtime provides one.
+the runtime provides one, then posts `COMPLETED` to `AUTOMATION_CALLBACK_URL`.
+If execution fails, it posts `FAILED` with the error before exiting non-zero.
 
 The manifest also demonstrates `runtime.agent_profile.allowed_tools`: the automation
 service should reject an agent profile unless it explicitly enables exactly the
