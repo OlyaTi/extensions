@@ -10,4 +10,6 @@ The script is intentionally deterministic and does not start an agent
 conversation. It prints the plugin-owned message and the agent profile name when
 the runtime provides one.
 
-The manifest also demonstrates `runtime.agent_profile.allowed_tools`: the automation service should reject an agent profile that enables any explicit tool outside this allowlist during validation.
+The manifest also demonstrates `runtime.agent_profile.allowed_tools`: the automation
+service should reject an agent profile unless it explicitly enables exactly the
+listed tools for the plugin.
