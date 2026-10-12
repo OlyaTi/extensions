@@ -12,4 +12,5 @@ the runtime provides one.
 
 The manifest also demonstrates `runtime.agent_profile.allowed_tools`: the automation
 service should reject an agent profile unless it explicitly enables exactly the
-listed tools for the plugin.
+listed tools for the plugin. The same allowlist model applies to MCP server refs
+and secret refs when a plugin declares them.
