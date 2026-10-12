@@ -1,0 +1,31 @@
+{
+  "schema_version": "openhands.automation.plugin.v1",
+  "name": "hello-world-automation",
+  "description": "A minimal example plugin-backed executable automation.",
+  "entrypoint": {
+    "command": "python3 scripts/main.py",
+    "working_dir": "."
+  },
+  "runtime": {
+    "agent_profile": {
+      "required": true,
+      "default_name": "hello-world-agent"
+    },
+    "llm_profile": {
+      "required": true,
+      "default_name": "default"
+    },
+    "required_secrets": [],
+    "plugins": []
+  },
+  "config_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "message": {
+        "type": "string",
+        "default": "Hello, world!"
+      }
+    }
+  }
+}

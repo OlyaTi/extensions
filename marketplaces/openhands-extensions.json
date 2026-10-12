@@ -93,6 +93,17 @@
       ]
     },
     {
+      "name": "hello-world-automation",
+      "source": "./plugins/hello-world-automation",
+      "description": "Example executable automation plugin that prints hello world and demonstrates the proposed automation-plugin manifest.",
+      "category": "automations",
+      "keywords": [
+        "automation",
+        "example",
+        "hello-world"
+      ]
+    },
+    {
       "name": "agent-canvas-environment",
       "source": "./skills/agent-canvas-environment",
       "description": "Work effectively inside a local Agent Canvas environment, including local agent-server auth, safe workspace hygiene, and local conversation delegation.",

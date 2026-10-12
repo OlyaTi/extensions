@@ -1,0 +1,17 @@
+{
+  "name": "hello-world-automation",
+  "version": "0.1.0",
+  "description": "Example executable automation plugin that prints hello world.",
+  "author": {
+    "name": "OpenHands",
+    "email": "contact@all-hands.dev"
+  },
+  "homepage": "https://github.com/OpenHands/extensions",
+  "repository": "https://github.com/OpenHands/extensions",
+  "license": "MIT",
+  "keywords": [
+    "automation",
+    "example",
+    "hello-world"
+  ]
+}
