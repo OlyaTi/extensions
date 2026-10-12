@@ -20,14 +20,11 @@ def load_config() -> dict:
 
 def main() -> None:
     config = load_config()
-    message = config.get("message") or "Hello, world!"
+    message = config.get("message") or "Hello from the automation plugin"
     print(message)
     agent_profile = os.environ.get("AUTOMATION_AGENT_PROFILE_NAME")
-    llm_profile = os.environ.get("AUTOMATION_LLM_PROFILE_NAME")
     if agent_profile:
         print(f"Agent profile: {agent_profile}")
-    if llm_profile:
-        print(f"LLM profile: {llm_profile}")
 
 
 if __name__ == "__main__":

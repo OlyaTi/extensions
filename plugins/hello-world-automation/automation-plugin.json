@@ -14,10 +14,6 @@
         "terminal"
       ]
     },
-    "llm_profile": {
-      "required": true,
-      "default_name": "default"
-    },
     "required_secrets": [],
     "plugins": []
   },
@@ -27,7 +23,7 @@
     "properties": {
       "message": {
         "type": "string",
-        "default": "Hello, world!"
+        "default": "Hello from the automation plugin"
       }
     }
   }
