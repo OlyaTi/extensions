@@ -1,7 +1,7 @@
 {
   "name": "hello-world-automation",
   "version": "0.1.0",
-  "description": "Example executable automation plugin that prints hello world.",
+  "description": "Example automation plugin that runs a plugin command through the stock conversation runner.",
   "author": {
     "name": "OpenHands",
     "email": "contact@all-hands.dev"

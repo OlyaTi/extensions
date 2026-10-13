@@ -1,17 +1,16 @@
 # Hello World Automation Plugin
 
-A minimal example of the proposed executable automation plugin format.
+This is a minimal plugin-backed automation that uses the automation service stock runner.
 
-The automation service reads `automation-plugin.json`, validates the required
-profile and plugin-owned config defaults, then runs `python3 scripts/main.py`
-with runtime metadata exposed through environment variables and config files.
+The automation manifest points at a plugin command instead of a custom Python entrypoint:
 
-The script is intentionally deterministic and does not start an agent
-conversation. It prints the plugin-owned message and the agent profile name when
-the runtime provides one, then posts `COMPLETED` to `AUTOMATION_CALLBACK_URL`.
-If execution fails, it posts `FAILED` with the error before exiting non-zero.
+```json
+"entrypoint": {
+  "runner": "conversation",
+  "command": "hello"
+}
+```
 
-The manifest also demonstrates `runtime.agent_profile.allowed_tools`: the automation
-service should reject an agent profile unless it explicitly enables exactly the
-listed tools for the plugin. The same allowlist model applies to MCP server refs
-and secret refs when a plugin declares them.
+At run time, the automation service packages the stock SDK runner. The runner loads this same plugin as a conversation plugin and sends `/hello-world-automation:hello` as the prompt. The command prompt lives in `commands/hello.md`.
+
+The manifest also demonstrates `runtime.agent_profile.allowed_tools`: the automation service rejects an agent profile unless it explicitly enables exactly the tools the plugin allows. The same allowlist model applies to MCP server refs and secret refs when a plugin declares them.

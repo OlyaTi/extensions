@@ -1,10 +1,10 @@
 {
   "schema_version": "openhands.automation.plugin.v1",
   "name": "hello-world-automation",
-  "description": "A minimal example plugin-backed executable automation.",
+  "description": "A minimal plugin-backed automation using the stock conversation runner.",
   "entrypoint": {
-    "command": "python3 scripts/main.py",
-    "working_dir": "."
+    "runner": "conversation",
+    "command": "hello"
   },
   "runtime": {
     "agent_profile": {
