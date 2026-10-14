@@ -1,5 +1,57 @@
 # Laminar Signal Analysis
 
+## Local automation trace replay
+
+`replay.py` is a small, stdlib-only prototype for comparing trace analyzers before
+production rollout. It reads automation conversation spans from Laminar, freezes
+a local sample, checks model evidence references, and optionally asks a coordinator
+for testable improvement hypotheses. It makes no source edits or external writes
+beyond model inference requests.
+
+Supply credentials through the environment:
+
+- `LMNR_PROJECT_API_KEY`: SQL-capable key for the intended project.
+- `LMNR_BASE_URL`: API origin; defaults to Laminar Cloud.
+- `LLM_API_KEY` and `LLM_BASE_URL`: OpenAI-compatible model endpoint.
+
+The project key scopes SQL reads. `--project-id` records provenance and does not
+grant access or select a different project's data. Use the intended project's key.
+
+```bash
+python utils/analysis/laminar_signals/replay.py fetch \
+  --project-id PROJECT_UUID --output /private/local/snapshot.json \
+  --app-url https://laminar.sh --limit 3 --max-spans 80
+
+python utils/analysis/laminar_signals/replay.py analyze \
+  --input /private/local/snapshot.json --output /private/local/luna.json \
+  --model openai/gpt-6-luna --coordinator openai/gpt-6.1-sol
+```
+
+Run `analyze` with different `--model` values on the same snapshot to compare
+latency, token usage, reported proxy cost, and findings. Omit `--coordinator` for
+analyzer comparisons. Add repeatable `--source-file` arguments to ground the
+coordinator in reviewed source. Model availability depends on the endpoint.
+GPT-6 models use the Responses API with low reasoning effort by default; use
+`--reasoning-effort` to compare supported settings. GPT-6.1 Sol rejects `none`.
+Other providers use Chat Completions. Both endpoints must support forced function
+output for the report schema.
+
+Collection is sequential and limited to five conversations, seven days, 200 spans
+per conversation, and two megabytes per response. It excludes recent conversation
+starts, which does not prove completion. Session attribution uses span metadata
+because a single trace can contain multiple conversations. Accumulated LLM inputs
+are omitted; long span content and large conversations are explicitly truncated.
+The snapshot records these limits. Treat conclusions from incomplete evidence as
+provisional.
+
+Credential/email redaction is best effort; review snapshots before sharing them.
+Keep snapshots and reports outside version control. Output files are owner-only.
+Each model request has an output/input limit; unknown span or finding references
+fail validation. There are no automatic retries, deployments, or PR publications.
+Reports contain model judgments and hypotheses, not evaluated improvements or
+measured detector accuracy. Production budgets, durable scheduling/deduplication,
+human-labeled evaluation, and source revision uptake remain subsequent work.
+
 Analyze Laminar signal events using LLMs to identify issues and areas for improvement. Uses function calling to get structured output with clickable trace URLs.
 
 **Primary Focus**: Identifying problems and generating actionable recommendations to improve AI agent behavior.
