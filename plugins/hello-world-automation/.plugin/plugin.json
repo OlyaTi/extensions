@@ -1,7 +1,7 @@
 {
   "name": "hello-world-automation",
   "version": "0.1.0",
-  "description": "Example automation plugin that runs a plugin command through the stock conversation runner.",
+  "description": "Example automation plugin that runs a deterministic script entrypoint with no required agent profile.",
   "author": {
     "name": "OpenHands",
     "email": "contact@all-hands.dev"
@@ -17,17 +17,10 @@
   "automation": {
     "schema_version": "openhands.automation.plugin.v1",
     "entrypoint": {
-      "runner": "conversation",
-      "command": "hello"
+      "runner": "script",
+      "command": "python3 scripts/main.py"
     },
     "runtime": {
-      "agent_profile": {
-        "required": true,
-        "default_name": "hello-world-agent",
-        "allowed_tools": [
-          "terminal"
-        ]
-      },
       "plugins": []
     },
     "config_schema": {

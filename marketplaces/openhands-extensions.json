@@ -95,7 +95,7 @@
     {
       "name": "hello-world-automation",
       "source": "./plugins/hello-world-automation",
-      "description": "Example automation plugin that runs a plugin command through the stock conversation runner.",
+      "description": "Example automation plugin that runs a deterministic script entrypoint with no required agent profile.",
       "category": "automations",
       "keywords": [
         "automation",
