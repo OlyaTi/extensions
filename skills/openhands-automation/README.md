@@ -16,8 +16,9 @@ This skill is activated by keywords:
 
 ## Features
 
-- **Prompt-based creation**: Create automations from a natural language prompt, for tasks that benefit from agent reasoning
-- **Plugin automations**: Use plugin presets for prompt-driven plugin runs, or plugin-spec automations when a plugin manifest declares its config schema, runtime profiles, entrypoint, and suggested trigger
+- **Plugin-spec automations (preferred for reusable/code-backed work)**: Create automations from a plugin in a chosen local or remote git repo, with a manifest that declares its config schema, runtime profiles, entrypoint, and suggested trigger
+- **Prompt-based creation**: Create one-off automations from a natural language prompt, for tasks that benefit from agent reasoning
+- **Plugin preset automations**: Use plugin presets for prompt-driven plugin runs when no executable plugin-spec contract exists yet
 - **Custom scripts**: Run your own code, with or without an LLM - the cheaper, more reliable fit for deterministic tasks (fixed data, scheduled HTTP calls, templated messages), and for custom dependencies or full control (see [references/custom-automation.md](references/custom-automation.md))
 - **Event-triggered automations**: Trigger on GitHub events (PR opened, issue commented, push, etc.)
 - **Custom webhooks**: Register webhooks for any service (Stripe, Slack, Linear, etc.)
@@ -31,7 +32,7 @@ Use an explicitly provided host first. When a local Agent Canvas automation serv
 
 ## Quick Start
 
-The examples below use the prompt preset, which suits tasks that need reasoning or judgment. For a deterministic task that needs no LLM, use a custom script instead — see the *Custom Script Example (No LLM)* in [SKILL.md](SKILL.md).
+Prefer plugin-spec automations for reusable or code-backed work. Before creating one, ask which local git repo or remote git repo should be used as the plugin source; if the user wants a local source and no repo exists yet, help initialize and commit one first. The examples below use the prompt preset, which still suits one-off tasks that need reasoning or judgment. For a deterministic task that needs no LLM, use a custom script instead — see the *Custom Script Example (No LLM)* in [SKILL.md](SKILL.md).
 
 ### Cron-Triggered Automation
 

@@ -26,7 +26,8 @@ The agent must follow these steps when creating an automation:
 * Quickly check that you can access the correct automations backend using the auth mechanism below
 * Quickly check that you can access any necessary integrations (e.g. GitHub, Slack); if access fails, inform the user and stop
 * Ask the user for any necessary information, e.g. if you need the name of a Slack channel or GitHub repo to proceed
-* Write the code or prompt that will be sent to the automations backend _inside the current workspace_
+* Prefer creating a plugin-spec automation when the task can be packaged as an executable plugin. Before creating it, ask which local git repo or remote git repo should be used as the plugin source; if the user wants a local source and no repo exists yet, help them initialize and commit a local git repo first.
+* Write the code, plugin manifest, or prompt that will be sent to the automations backend _inside the current workspace_
 * Show the code to the user with the `canvas_ui` tool if available, otherwise present it in a fenced code block in your reply
 * Message the user with a concise summary of how the automation will behave, and ask if they are ready to deploy it
 
@@ -61,17 +62,21 @@ The agent server typically runs inside a **sandbox** (a Docker or Kubernetes con
 >    - "post to Slack / webhook every N minutes"
 >    - Any task where the full output could be written as a static template right now
 >
-> 1. **For LLM-appropriate work, default to preset endpoints.** They handle all SDK boilerplate, tarball packaging, and upload automatically:
->    - **Prompt preset** (`POST /v1/preset/prompt`) — for tasks expressed as a natural language prompt that benefit from agent reasoning
->    - **Plugin preset** (`POST /v1/preset/plugin`) — when plugins with skills, MCP configs, or commands are needed
-> 2. **Present the options, then build the one the user picks.** Whenever rule 0 applies, or neither preset is a clean fit (custom Python dependencies, a non-Python entrypoint, a multi-file project, direct SDK lifecycle control), lay the choices out side by side with a one-line note on cost and reliability for each, and let the user choose:
+> 1. **For reusable or code-backed automations, prefer plugin specs.** A plugin-spec automation (`POST /v1/plugin-spec`) is the preferred path when the automation can be packaged as an executable plugin with its own manifest, config schema, runtime profiles, and entrypoint. Before creating it, ask which source repo to use:
+>    - **Remote git repo** - usually `github:owner/repo` or `https://github.com/owner/repo.git`, plus optional `ref` and `repo_path`. Required for Cloud unless the deployment explicitly supports local sources.
+>    - **Local git repo** - local Agent Canvas only. Ask for the path. If the user has not created one, help create a directory, run `git init`, add the plugin files, and make an initial commit before calling `/plugin-spec`. Do not point plugin-spec creation at an uncommitted temp directory.
+> 2. **Use prompt or plugin presets for one-off LLM work.** They handle SDK boilerplate, tarball packaging, and upload automatically:
+>    - **Prompt preset** (`POST /v1/preset/prompt`) - for one-off tasks expressed as a natural language prompt that benefit from agent reasoning
+>    - **Plugin preset** (`POST /v1/preset/plugin`) - when plugins with skills, MCP configs, or commands are needed but no executable plugin-spec contract exists yet
+> 3. **Present the options, then build the one the user picks.** Whenever rule 0 applies, or neither plugin spec nor a preset is a clean fit (custom Python dependencies, a non-Python entrypoint, a multi-file project, direct SDK lifecycle control), lay the choices out side by side with a one-line note on cost and reliability for each, and let the user choose:
+>    - **Plugin spec automation** - preferred for reusable/code-backed automations; requires a local or remote git repo source
 >    - **Prompt preset** - natural language prompt execution (LLM-driven)
 >    - **Plugin preset** - load plugins with extended capabilities (skills, MCP, hooks, commands)
 >    - **Custom script** - full control over code, with or without an LLM; see `references/custom-automation.md`
 >
 >    Do not silently fall back to either side. The "ready to deploy?" confirmation in the creation process applies to every path equally; a custom script needs no extra permission beyond it, and a preset gets no pass on it.
-> 3. **Building a custom script:** follow `references/custom-automation.md` for tarball packaging, validation, and upload. The *Custom Script Example (No LLM)* below shows the whole flow end to end.
-> 4. **Before suggesting event-triggered (webhook) automations, check whether the deployment is publicly reachable.** Check `RUNTIME_URL`. Webhooks require an internet-accessible URL so that external services (GitHub, Slack, Linear, etc.) can deliver events to the automation service. If `RUNTIME_URL` is unset, empty, or resolves to a local or private address (`localhost`, `127.0.0.1`, `0.0.0.0`, or any RFC 1918 range: `10.x.x.x`, `192.168.x.x`, `172.16–31.x.x`), the service cannot receive inbound webhook traffic from the public internet. In that case:
+> 4. **Building a custom script:** follow `references/custom-automation.md` for tarball packaging, validation, and upload. The *Custom Script Example (No LLM)* below shows the whole flow end to end.
+> 5. **Before suggesting event-triggered (webhook) automations, check whether the deployment is publicly reachable.** Check `RUNTIME_URL`. Webhooks require an internet-accessible URL so that external services (GitHub, Slack, Linear, etc.) can deliver events to the automation service. If `RUNTIME_URL` is unset, empty, or resolves to a local or private address (`localhost`, `127.0.0.1`, `0.0.0.0`, or any RFC 1918 range: `10.x.x.x`, `192.168.x.x`, `172.16–31.x.x`), the service cannot receive inbound webhook traffic from the public internet. In that case:
 >    - **Recommend a cron-based polling automation instead.** Have the automation run on a schedule and call the external service's API (e.g., the GitHub REST API) to check for new events since the last run.
 >    - Explain the limitation clearly to the user: "Because this is a local deployment, external services can't reach the webhook endpoint. I'll set up a polling automation using a cron schedule instead."
 
@@ -190,11 +195,11 @@ Automations support two trigger types:
 
 ## Creating Automations
 
-Three service-managed paths simplify automation creation by handling runtime wiring, tarball packaging, and upload automatically:
+Three service-managed paths simplify automation creation by handling runtime wiring, tarball packaging, and upload automatically. Prefer them in this order when the task fits:
 
-1. **Prompt Preset** - Execute a natural language prompt (simple tasks)
-2. **Plugin Preset** - Load plugins with skills, MCP configs, and commands, then run a prompt
-3. **Plugin Spec Automation** - Create from a plugin that declares its own automation manifest, setup schema, runtime profiles, entrypoint, and optional suggested trigger
+1. **Plugin Spec Automation** - Preferred for reusable or code-backed automations. Create from a plugin in a chosen local or remote git repo that declares its own automation manifest, setup schema, runtime profiles, entrypoint, and optional suggested trigger.
+2. **Prompt Preset** - Execute a natural language prompt for one-off agent-shaped work.
+3. **Plugin Preset** - Load plugins with skills, MCP configs, and commands, then run a caller-provided prompt.
 
 ---
 
@@ -898,9 +903,21 @@ curl -X POST "${OPENHANDS_HOST}/api/automation/v1/preset/plugin" \
 
 ### Plugin Spec Automations
 
-Use the **plugin-spec endpoint** when a plugin is itself the automation product. The plugin owns the install-time schema, runtime profile requirements, entrypoint, secondary plugins, and optional suggested trigger. This is different from the plugin preset: the caller does not provide a free-form prompt or runtime profile overrides.
+Use the **plugin-spec endpoint** when a plugin is itself the automation product. This is the preferred path for new reusable or code-backed automations. The plugin owns the install-time schema, runtime profile requirements, entrypoint, secondary plugins, and optional suggested trigger. This is different from the plugin preset: the caller does not provide a free-form prompt or runtime profile overrides.
 
 Plugin-spec automations are the preferred contract for catalog entries that ship an executable plugin. The host can read the plugin manifest, render a setup form from `config_schema`, validate the user's config, then call `/plugin-spec`.
+
+#### Source Repository Prerequisite
+
+Before creating a plugin-spec automation, ask the user which plugin source repository to use. Do this before writing the manifest or calling the API.
+
+| Source choice | When to use | What to ask or do |
+|---------------|-------------|-------------------|
+| Existing remote git repo | Cloud or shared deployments, and any automation that should be portable | Ask for `github:owner/repo` or `https://github.com/owner/repo.git`, plus optional `ref` and `repo_path`. Use credential-free URLs only. |
+| Existing local git repo | Local Agent Canvas only | Ask for the local path. Verify it is a git repo and place the plugin under the chosen `repo_path` or repo root. |
+| New local git repo | Local Agent Canvas only, when the user does not have a repo yet | Help create one: make a directory, run `git init`, write the plugin files, `git add` them, and create an initial commit before creating the automation. |
+
+In cloud mode, local and `file://` plugin sources are rejected. Use a remote GitHub source. In local mode, never point `/plugin-spec` at an uncommitted scratch directory; a git repo with committed plugin files makes the automation reproducible and updateable.
 
 #### Manifest Location
 
@@ -1194,14 +1211,15 @@ Pick based on **what the task needs**, not just **what is technically possible**
 
 | Use Case | Recommended |
 |----------|-------------|
-| Reasoning, summarization, triage, code review, or open-ended tool use | **Prompt Preset** |
-| Needs plugin commands / skills / MCP configs / hooks plus a caller-provided prompt | **Plugin Preset** |
+| Reusable or code-backed automation that can live in a local or remote git repo | **Plugin Spec Automation** |
 | Existing executable automation plugin whose manifest owns config, runtime profiles, entrypoint, and suggested trigger | **Plugin Spec Automation** |
+| One-off reasoning, summarization, triage, code review, or open-ended tool use with no reusable plugin needed | **Prompt Preset** |
+| Needs plugin commands / skills / MCP configs / hooks plus a caller-provided prompt, but no executable plugin-spec contract exists yet | **Plugin Preset** |
 | Compare plugin versions or configurations across runs | **Plugin Preset with A/B testing** — see `references/ab-testing.md` |
 | **Deterministic task** (fixed data + scheduled action, e.g. healthcheck, Slack notification, rotating from a known list) — especially if it runs frequently | **Custom script, no LLM** — see `references/custom-automation.md#deterministic-script-no-llm` |
 | Custom Python dependencies, multi-file project, or direct SDK lifecycle control | **Custom script with SDK** — see `references/custom-automation.md#sdk-based-scripts` |
 
-The **prompt preset** is the right default for genuinely agent-shaped work — anything that benefits from reasoning over context, calling tools dynamically, or producing a non-templated output. Use the **plugin preset** when you need extended capabilities from plugins (skills, MCP configurations, hooks, commands) and still want to supply the prompt. Use **plugin spec automations** when an executable plugin already declares the setup schema, runtime profiles, command, and trigger contract.
+The **plugin spec automation** path is preferred when you can package the automation as an executable plugin in a local or remote git repo. Ask for that repo, or help the user create a local git repo, before creating the automation. Use the **prompt preset** for one-off agent-shaped work that benefits from reasoning but does not need reusable code. Use the **plugin preset** when you need extended plugin capabilities (skills, MCP configurations, hooks, commands) and still want to supply the prompt, but no plugin-spec contract exists yet.
 
 **Watch for deterministic, high-frequency patterns.** Requests like "send a daily standup reminder", "ping a healthcheck URL every minute", "post a random quote every 5 minutes", or "rotate a fact-of-the-day message" do not need an LLM. Surface this to the user explicitly with a rough cost framing (e.g. "this schedule will invoke your LLM ~288 times/day") before defaulting to a preset. As a rule of thumb, any cron tighter than hourly deserves a deliberate "should this really be agent-driven?" check.
 
