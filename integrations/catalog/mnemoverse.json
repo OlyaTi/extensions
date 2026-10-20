@@ -1,0 +1,50 @@
+{
+  "id": "mnemoverse",
+  "name": "Mnemoverse",
+  "description": "Hosted persistent memory for agents: save decisions, preferences and lessons, then recall them in later conversations and in other MCP clients.",
+  "categories": [
+    "Knowledge base",
+    "AI"
+  ],
+  "appUrl": "https://mnemoverse.com",
+  "docsUrl": "https://mnemoverse.com/docs/api/mcp-server",
+  "notes": "Runs the MIT-licensed @mnemoverse/mcp-memory-server package over stdio with an API key. Memory is kept by the hosted Mnemoverse service, not in the sandbox, so it carries over to conversations that start in a fresh runtime. Memory is scoped to the account behind the key, so other MCP clients connected with the same API key reach the same memory. Rating a recalled memory as helpful or misleading re-ranks what comes back next.",
+  "connectionOptions": [
+    {
+      "id": "api-key",
+      "provider": "mcp",
+      "transport": {
+        "kind": "stdio",
+        "serverName": "mnemoverse",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@mnemoverse/mcp-memory-server@0.15.1"
+        ],
+        "envFields": [
+          {
+            "key": "MNEMOVERSE_API_KEY",
+            "label": "Mnemoverse API key",
+            "type": "password",
+            "placeholder": "mk_live_...",
+            "required": true,
+            "helperText": "Create a key in the Mnemoverse console. The free plan needs no credit card.",
+            "helperLink": "https://console.mnemoverse.com/sign-up"
+          }
+        ]
+      },
+      "auth": {
+        "strategy": "api_key"
+      }
+    }
+  ],
+  "iconBg": "#111827",
+  "keywords": [
+    "memory",
+    "agent memory",
+    "persistent memory",
+    "long-term memory",
+    "context"
+  ],
+  "installHint": "Create a free account at console.mnemoverse.com (no credit card) and paste an API key that starts with mk_live_."
+}
