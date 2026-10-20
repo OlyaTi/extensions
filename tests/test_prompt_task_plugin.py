@@ -32,6 +32,7 @@ def test_command_triggers_no_public_skill():
     matches = []
     for skill in [
         *REPO_ROOT.glob("skills/*/SKILL.md"),
+        *REPO_ROOT.glob("plugins/*/SKILL.md"),
         *REPO_ROOT.glob("plugins/*/skills/*/SKILL.md"),
     ]:
         frontmatter = re.match(r"^---\n(.*?)\n---", skill.read_text(), re.S)
