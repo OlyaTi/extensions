@@ -8,8 +8,31 @@
   ],
   "appUrl": "https://mnemoverse.com",
   "docsUrl": "https://mnemoverse.com/docs/api/remote-mcp-server",
-  "notes": "Connects to the hosted endpoint https://mcp.mnemoverse.com/mcp over streamable HTTP with a Mnemoverse API key sent as a bearer token, so nothing runs inside the sandbox. Memory is kept by the hosted Mnemoverse service, not in the sandbox, so it carries over to conversations that start in a fresh runtime. Memory is scoped to the Mnemoverse account, so other MCP clients connected to the same account reach the same memory. Rating a recalled memory as helpful or misleading re-ranks what comes back next.",
+  "notes": "Both options connect to the hosted endpoint https://mcp.mnemoverse.com/mcp over streamable HTTP, so nothing runs inside the sandbox. The oauth option signs in through the browser; the server supports Dynamic Client Registration with PKCE, so no client ID or client secret is needed. The api-key option sends a Mnemoverse API key as a bearer token. Memory is kept by the hosted Mnemoverse service, not in the sandbox, so it carries over to conversations that start in a fresh runtime. Memory is scoped to the Mnemoverse account, so other MCP clients connected to the same account reach the same memory. Rating a recalled memory as helpful or misleading re-ranks what comes back next.",
   "connectionOptions": [
+    {
+      "id": "oauth",
+      "provider": "mcp",
+      "transport": {
+        "kind": "shttp",
+        "url": "https://mcp.mnemoverse.com/mcp"
+      },
+      "auth": {
+        "strategy": "oauth2",
+        "oauth": {
+          "scopes": [
+            "openid",
+            "profile",
+            "email",
+            "memory:read",
+            "memory:write",
+            "offline_access"
+          ],
+          "pkce": true,
+          "clientAuthentication": "none"
+        }
+      }
+    },
     {
       "id": "api-key",
       "provider": "mcp",
@@ -35,5 +58,5 @@
     "long-term memory",
     "context"
   ],
-  "installHint": "Create a free account at console.mnemoverse.com (no credit card) and paste an API key that starts with mk_live_. It is sent to the hosted endpoint as a bearer token."
+  "installHint": "Sign in to Mnemoverse in the browser when prompted; no client ID, client secret or API key is needed, and a free account needs no credit card. To use an API key instead, choose the API key option and paste a key that starts with mk_live_ from console.mnemoverse.com; it is sent to the hosted endpoint as a bearer token."
 }
