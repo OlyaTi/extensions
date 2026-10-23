@@ -7,34 +7,23 @@
     "AI"
   ],
   "appUrl": "https://mnemoverse.com",
-  "docsUrl": "https://mnemoverse.com/docs/api/mcp-server",
-  "notes": "Runs the MIT-licensed @mnemoverse/mcp-memory-server package over stdio with an API key. Memory is kept by the hosted Mnemoverse service, not in the sandbox, so it carries over to conversations that start in a fresh runtime. Memory is scoped to the account behind the key, so other MCP clients connected with the same API key reach the same memory. Rating a recalled memory as helpful or misleading re-ranks what comes back next.",
+  "docsUrl": "https://mnemoverse.com/docs/api/remote-mcp-server",
+  "notes": "Connects to the hosted endpoint https://mcp.mnemoverse.com/mcp over streamable HTTP with a Mnemoverse API key sent as a bearer token, so nothing runs inside the sandbox. Memory is kept by the hosted Mnemoverse service, not in the sandbox, so it carries over to conversations that start in a fresh runtime. Memory is scoped to the Mnemoverse account, so other MCP clients connected to the same account reach the same memory. Rating a recalled memory as helpful or misleading re-ranks what comes back next.",
   "connectionOptions": [
     {
       "id": "api-key",
       "provider": "mcp",
       "transport": {
-        "kind": "stdio",
-        "serverName": "mnemoverse",
-        "command": "npx",
-        "args": [
-          "-y",
-          "@mnemoverse/mcp-memory-server@0.15.1"
-        ],
-        "envFields": [
-          {
-            "key": "MNEMOVERSE_API_KEY",
-            "label": "Mnemoverse API key",
-            "type": "password",
-            "placeholder": "mk_live_...",
-            "required": true,
-            "helperText": "Create a key in the Mnemoverse console. The free plan needs no credit card.",
-            "helperLink": "https://console.mnemoverse.com/sign-up"
-          }
-        ]
+        "kind": "shttp",
+        "url": "https://mcp.mnemoverse.com/mcp"
       },
       "auth": {
-        "strategy": "api_key"
+        "strategy": "bearer",
+        "credentialLabel": "Mnemoverse API key",
+        "credentialPlaceholder": "mk_live_...",
+        "credentialHelp": "Create a key in the [Mnemoverse console](https://console.mnemoverse.com/sign-up); the free plan needs no credit card. Sent as Authorization: Bearer <key>.",
+        "credentialSecretName": "MNEMOVERSE_API_KEY",
+        "saveCredentialAsSecretByDefault": true
       }
     }
   ],
@@ -46,5 +35,5 @@
     "long-term memory",
     "context"
   ],
-  "installHint": "Create a free account at console.mnemoverse.com (no credit card) and paste an API key that starts with mk_live_."
+  "installHint": "Create a free account at console.mnemoverse.com (no credit card) and paste an API key that starts with mk_live_. It is sent to the hosted endpoint as a bearer token."
 }
